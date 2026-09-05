@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:next_cursos/shared/widgets/divisor_barra.dart';
 
 import '../../../app/app_routes.dart';
 import '../../../core/auth/auth_service.dart';
 import '../../../core/theme/theme.dart';
+import '../../../data/mock/cursos_mock.dart';
 import '../../../data/mock/estudantes_mock.dart';
 import '../../../data/mock/inscricoes_mock.dart';
 import '../../../data/mock/instituicoes_mock.dart';
@@ -14,6 +16,7 @@ import '../../../shared/widgets/build_footer.dart';
 import '../../../shared/widgets/nome_app.dart';
 import '../../inscricoes/models/inscricao.dart';
 import '../../oportunidades/models/oportunidade.dart';
+import '../../cursos/models/curso.dart';
 
 class InstituicaoDashboardPage extends StatefulWidget {
   const InstituicaoDashboardPage({super.key});
@@ -40,9 +43,14 @@ class _InstituicaoDashboardPageState extends State<InstituicaoDashboardPage> {
     final width = MediaQuery.sizeOf(context).width;
     final isMobile = width < 800;
 
-    // Oportunidades pertencentes à instituição logada.
+    // Oportunidades pertencentes à instituição logada (através do Curso).
+    final meusCursos =
+        cursosMock.where((c) => c.instituicaoId == instituicao.id).toList();
+
+    final meusCursosIds = meusCursos.map((c) => c.id).toSet();
+
     final minhasOportunidades = oportunidadesMock
-        .where((o) => o.instituicaoId == instituicao.id)
+        .where((o) => meusCursosIds.contains(o.cursoId))
         .toList();
 
     // IDs das oportunidades da instituição.
@@ -58,27 +66,96 @@ class _InstituicaoDashboardPageState extends State<InstituicaoDashboardPage> {
         title: nomeApp(context),
         elevation: 1,
         actions: [
-          if (!isMobile)
-            TextButton.icon(
-              onPressed: _novaOportunidade,
-              icon: const Icon(Icons.add),
-              label: const Text('Nova oportunidade'),
-            ),
+          !isMobile
+              ? Row(
+                  children: [
+                    TextButton.icon(
+                      onPressed: _novoCurso,
+                      icon: const Icon(Icons.book_outlined),
+                      label: const Text('Cadastrar curso'),
+                    ),
+                    TextButton.icon(
+                      onPressed: _novaOportunidade,
+                      icon: const Icon(Icons.add),
+                      label: const Text('Nova oportunidade'),
+                    ),
+                  ],
+                )
+              : PopupMenuButton(
+                  icon: const Icon(Icons.menu_rounded),
+
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'novoCurso':
+                        _novoCurso();
+                        break;
+
+                      case 'novaOportunidade':
+                        _novaOportunidade();
+                        break;
+
+                      case 'logout':
+                        AuthService().logout();
+                        Navigator.of(
+                          context,
+                        ).pushReplacementNamed(AppRoutes.home);
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'novoCurso',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.book_outlined,
+                            color: AppColors.colors.textPrimary,
+                          ),
+                          SizedBox(width: 12),
+                          Text('Cadastrar curso'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'novaOportunidade',
+                      child: Row(
+                        children: [
+                          Icon(Icons.add, color: AppColors.colors.textPrimary),
+                          SizedBox(width: 12),
+                          Text('Nova oportunidade'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'logout',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.logout,
+                            color: AppColors.colors.textPrimary,
+                          ),
+                          SizedBox(width: 12),
+                          Text('Sair'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
 
           if (!isMobile) const SizedBox(width: 12),
+          if (!isMobile)
+            IconButton(
+              tooltip: 'Sair',
+              onPressed: () {
+                AuthService().logout();
 
-          IconButton(
-            tooltip: 'Sair',
-            onPressed: () {
-              AuthService().logout();
+                Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+              },
+              icon: const Icon(Icons.logout),
+            ),
 
-              Navigator.of(context).pushReplacementNamed(AppRoutes.home);
-            },
-            icon: const Icon(Icons.logout),
-          ),
-
-          const SizedBox(width: 12),
-
+          divisorBarra(40),
+          SizedBox(width: 12),
           CircleAvatar(
             backgroundColor: AppColors.colors.outFocus,
             child: Icon(
@@ -124,6 +201,8 @@ class _InstituicaoDashboardPageState extends State<InstituicaoDashboardPage> {
                       if (isMobile)
                         Column(
                           children: [
+                            _buildCursosList(meusCursos),
+                            const SizedBox(height: 32),
                             _buildOportunidadesList(
                               minhasOportunidades,
                               inscricoesRecebidas,
@@ -138,14 +217,18 @@ class _InstituicaoDashboardPageState extends State<InstituicaoDashboardPage> {
                           children: [
                             Expanded(
                               flex: 2,
-                              child: _buildOportunidadesList(
-                                minhasOportunidades,
-                                inscricoesRecebidas,
+                              child: Column(
+                                children: [
+                                  _buildCursosList(meusCursos),
+                                  const SizedBox(height: 32),
+                                  _buildOportunidadesList(
+                                    minhasOportunidades,
+                                    inscricoesRecebidas,
+                                  ),
+                                ],
                               ),
                             ),
-
                             const SizedBox(width: 32),
-
                             Expanded(
                               child: _buildRecentInscricoes(
                                 inscricoesRecebidas,
@@ -333,6 +416,211 @@ class _InstituicaoDashboardPageState extends State<InstituicaoDashboardPage> {
         ],
       ),
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Gestão dos cursos
+  // ---------------------------------------------------------------------------
+
+  Widget _buildCursosList(List<Curso> cursos) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Gestão de Cursos',
+                style: AppTextStyles.titleMedium().copyWith(
+                  color: AppColors.colors.textInBackGround,
+                ),
+              ),
+            ),
+            Text(
+              '${cursos.length} cadastrados',
+              style: AppTextStyles.titleSmall().copyWith(
+                color: AppColors.colors.textInBackGround,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        if (cursos.isEmpty)
+          _buildEmptyCursos()
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: cursos.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 16),
+            itemBuilder: (context, index) {
+              final curso = cursos[index];
+              return _cursoCard(curso);
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyCursos() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: AppColors.colors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.colors.outFocus),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.book_outlined,
+            size: 42,
+            color: AppColors.colors.outFocus,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Nenhum curso cadastrado.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.titleMedium().copyWith(
+              color: AppColors.colors.textInBackGround,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Cadastre seus cursos para poder criar oportunidades vinculadas a eles.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.titleSmall(),
+          ),
+          const SizedBox(height: 20),
+          OutlinedButton.icon(
+            onPressed: _novoCurso,
+            icon: const Icon(Icons.add),
+            label: const Text('Cadastrar curso'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _cursoCard(Curso curso) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.colors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.colors.outFocus),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: AppColors.colors.textPrimary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child:
+                Icon(Icons.book_outlined, color: AppColors.colors.textPrimary),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  curso.nome,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.colors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  '${curso.areaConhecimento} • ${_formatarModalidade(curso.modalidade.name)}',
+                  style: AppTextStyles.titleSmall()
+                      .copyWith(color: AppColors.colors.outFocus),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 20),
+          _statusAtivoBadge(curso.ativo),
+          const SizedBox(width: 8),
+          _menuCurso(curso),
+        ],
+      ),
+    );
+  }
+
+  Widget _statusAtivoBadge(bool ativo) {
+    final color = ativo ? Colors.green : Colors.grey;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        ativo ? 'ATIVO' : 'INATIVO',
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _menuCurso(Curso curso) {
+    return PopupMenuButton<String>(
+      tooltip: 'Opções',
+      icon: Icon(Icons.more_vert, color: AppColors.colors.textInBackGround),
+      onSelected: (value) {
+        switch (value) {
+          case 'editar':
+            Navigator.pushNamed(
+              context,
+              AppRoutes.cursoFormulario,
+              arguments: curso,
+            );
+            break;
+          case 'deletar':
+            // Mock de exclusão/desativação
+            break;
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'editar',
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined, color: AppColors.colors.textPrimary),
+              const SizedBox(width: 12),
+              const Text('Editar'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'deletar',
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline, color: Colors.red),
+              const SizedBox(width: 12),
+              const Text('Deletar', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatarModalidade(String value) {
+    if (value.isEmpty) return value;
+    return value[0].toUpperCase() + value.substring(1).toLowerCase();
   }
 
   // ---------------------------------------------------------------------------
@@ -816,5 +1104,9 @@ class _InstituicaoDashboardPageState extends State<InstituicaoDashboardPage> {
 
   void _novaOportunidade() {
     Navigator.pushNamed(context, AppRoutes.oportunidadeFormulario);
+  }
+
+  void _novoCurso() {
+    Navigator.pushNamed(context, AppRoutes.cursoFormulario);
   }
 }

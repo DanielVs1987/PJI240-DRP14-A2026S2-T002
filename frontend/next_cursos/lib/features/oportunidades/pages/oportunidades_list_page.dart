@@ -5,6 +5,7 @@ import '../../../app/app_routes.dart';
 import '../../../core/theme/theme.dart';
 import '../../../data/mock/auth_mock.dart';
 import '../../../data/mock/oportunidades_mock.dart';
+import '../../../data/mock/cursos_mock.dart';
 import '../../../shared/models/enums.dart';
 import '../models/oportunidade.dart';
 
@@ -12,8 +13,18 @@ class OportunidadesListArgs {
   final String titulo;
   final List<TipoOportunidade> tipos;
   final AuthCredentialMock? authUser;
+  final bool filtrarPorProcessoSeletivo;
+  final String? termoBuscaInicial;
+  final List<ModalidadeCurso>? modalidades;
 
-  OportunidadesListArgs({required this.titulo, required this.tipos, required this.authUser});
+  OportunidadesListArgs({
+    required this.titulo,
+    required this.tipos,
+    required this.authUser,
+    this.filtrarPorProcessoSeletivo = false,
+    this.termoBuscaInicial,
+    this.modalidades,
+  });
 }
 
 class OportunidadesListPage extends StatefulWidget {
@@ -26,8 +37,21 @@ class OportunidadesListPage extends StatefulWidget {
 }
 
 class _OportunidadesListPageState extends State<OportunidadesListPage> {
-  final TextEditingController _searchController = TextEditingController();
+  late final TextEditingController _searchController;
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchQuery = widget.args.termoBuscaInicial ?? '';
+    _searchController = TextEditingController(text: _searchQuery);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +59,28 @@ class _OportunidadesListPageState extends State<OportunidadesListPage> {
     final isMobile = width < 700;
 
     final filteredList = oportunidadesMock.where((op) {
+      // Filtro por Tipo
       final matchesType = widget.args.tipos.contains(op.tipo);
+
+      // Filtro por Termo de Busca (Título ou Descrição)
       final matchesSearch =
           op.titulo.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           op.descricao.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesType && matchesSearch;
+      
+      // Filtro por Processo Seletivo
+      bool matchesProcesso = true;
+      if (widget.args.filtrarPorProcessoSeletivo) {
+        matchesProcesso = op.possuiProcessoSeletivo;
+      }
+
+      // Filtro por Modalidade (Busca no curso vinculado)
+      bool matchesModalidade = true;
+      if (widget.args.modalidades != null && widget.args.modalidades!.isNotEmpty) {
+        final curso = cursosMock.firstWhere((c) => c.id == op.cursoId);
+        matchesModalidade = widget.args.modalidades!.contains(curso.modalidade);
+      }
+
+      return matchesType && matchesSearch && matchesProcesso && matchesModalidade;
     }).toList();
 
     return Scaffold(
@@ -92,9 +133,8 @@ class _OportunidadesListPageState extends State<OportunidadesListPage> {
         decoration: InputDecoration(
           hintText: 'Buscar nesta categoria...',
           prefixIcon: const Icon(Icons.search),
-
           filled: true,
-
+          fillColor: const Color(0xFFF5F7FA),
         ),
       ),
     );

@@ -3,7 +3,6 @@ import '../../../shared/models/enums.dart';
 class Oportunidade {
   final String id;
   final String cursoId;
-  final String instituicaoId;
   final String titulo;
   final String descricao;
   final TipoOportunidade tipo;
@@ -18,14 +17,13 @@ class Oportunidade {
   final String? editalUrl;
   final String? observacoes;
   final String? imagemUrl;
-  final bool? historicoEscolarObrigatorio;
-  final bool? comprovanteRendaObrigatorio;
-
+  final bool historicoEscolarObrigatorio;
+  final bool comprovanteRendaObrigatorio;
+  final bool possuiProcessoSeletivo;
 
   const Oportunidade({
     required this.id,
     required this.cursoId,
-    required this.instituicaoId,
     required this.titulo,
     required this.descricao,
     required this.tipo,
@@ -40,14 +38,14 @@ class Oportunidade {
     this.editalUrl,
     this.observacoes,
     this.imagemUrl,
-    this.historicoEscolarObrigatorio,
-    this.comprovanteRendaObrigatorio
+    required this.historicoEscolarObrigatorio,
+    required this.comprovanteRendaObrigatorio,
+    this.possuiProcessoSeletivo = false,
   });
 
   Oportunidade copyWith({
     String? id,
     String? cursoId,
-    String? instituicaoId,
     String? titulo,
     String? descricao,
     TipoOportunidade? tipo,
@@ -63,12 +61,12 @@ class Oportunidade {
     String? observacoes,
     String? imagemUrl,
     bool? historicoEscolarObrigatorio,
-    bool? comprovanteRendaObrigatorio
+    bool? comprovanteRendaObrigatorio,
+    bool? possuiProcessoSeletivo,
   }) {
     return Oportunidade(
       id: id ?? this.id,
       cursoId: cursoId ?? this.cursoId,
-      instituicaoId: instituicaoId ?? this.instituicaoId,
       titulo: titulo ?? this.titulo,
       descricao: descricao ?? this.descricao,
       tipo: tipo ?? this.tipo,
@@ -82,9 +80,13 @@ class Oportunidade {
       requisitos: requisitos ?? this.requisitos,
       editalUrl: editalUrl ?? this.editalUrl,
       observacoes: observacoes ?? this.observacoes,
-      imagemUrl:  imagemUrl ?? this.imagemUrl,
-      historicoEscolarObrigatorio: historicoEscolarObrigatorio ?? this.historicoEscolarObrigatorio,
-      comprovanteRendaObrigatorio: comprovanteRendaObrigatorio ?? this.comprovanteRendaObrigatorio
+      imagemUrl: imagemUrl ?? this.imagemUrl,
+      historicoEscolarObrigatorio:
+          historicoEscolarObrigatorio ?? this.historicoEscolarObrigatorio,
+      comprovanteRendaObrigatorio:
+          comprovanteRendaObrigatorio ?? this.comprovanteRendaObrigatorio,
+      possuiProcessoSeletivo:
+          possuiProcessoSeletivo ?? this.possuiProcessoSeletivo,
     );
   }
 
@@ -92,7 +94,6 @@ class Oportunidade {
     return {
       'id': id,
       'cursoId': cursoId,
-      'instituicaoId': instituicaoId,
       'titulo': titulo,
       'descricao': descricao,
       'tipo': tipo.name,
@@ -109,6 +110,7 @@ class Oportunidade {
       'imagemUrl': imagemUrl,
       'historicoEscolarObrigatorio': historicoEscolarObrigatorio,
       'comprovanteRendaObrigatorio': comprovanteRendaObrigatorio,
+      'possuiProcessoSeletivo': possuiProcessoSeletivo,
     };
   }
 
@@ -116,7 +118,6 @@ class Oportunidade {
     return Oportunidade(
       id: map['id'] ?? '',
       cursoId: map['cursoId'] ?? '',
-      instituicaoId: map['instituicaoId'] ?? '',
       titulo: map['titulo'] ?? '',
       descricao: map['descricao'] ?? '',
       tipo: TipoOportunidade.values.byName(
@@ -138,7 +139,8 @@ class Oportunidade {
       observacoes: map['observacoes'],
       imagemUrl: map['imagemUrl'] ?? '',
       historicoEscolarObrigatorio: map['historicoEscolarObrigatorio'] ?? false,
-      comprovanteRendaObrigatorio: map['comprovanteRendaObrigatorio'] ?? false
+      comprovanteRendaObrigatorio: map['comprovanteRendaObrigatorio'] ?? false,
+      possuiProcessoSeletivo: map['possuiProcessoSeletivo'] ?? false,
     );
   }
 }

@@ -5,7 +5,6 @@ final List<Oportunidade> oportunidadesMock = [
   Oportunidade(
     id: 'op-001',
     cursoId: 'curso-001',
-    instituicaoId: 'inst-001',
     titulo: 'Bolsa Integral em Engenharia de Software',
     descricao:
         'Oportunidade de bolsa integral para formação em Engenharia de Software.',
@@ -21,11 +20,11 @@ final List<Oportunidade> oportunidadesMock = [
     imagemUrl: '4.jpeg',
     historicoEscolarObrigatorio: true,
     comprovanteRendaObrigatorio: true,
+    possuiProcessoSeletivo: true,
   ),
   Oportunidade(
     id: 'op-002',
     cursoId: 'curso-002',
-    instituicaoId: 'inst-002',
     titulo: 'Curso Gratuito de Desenvolvimento Web',
     descricao:
         'Aprenda desenvolvimento web com conteúdos de frontend e backend.',
@@ -44,7 +43,6 @@ final List<Oportunidade> oportunidadesMock = [
   Oportunidade(
     id: 'op-003',
     cursoId: 'curso-003',
-    instituicaoId: 'inst-003',
     titulo: 'Bolsa de 70% em Administração',
     descricao:
         'Bolsa parcial para graduação em Administração na modalidade online.',
@@ -63,7 +61,6 @@ final List<Oportunidade> oportunidadesMock = [
   Oportunidade(
     id: 'op-004',
     cursoId: 'curso-004',
-    instituicaoId: 'inst-001',
     titulo: 'Curso Gratuito de Análise de Dados',
     descricao:
         'Formação introdutória em análise de dados, indicadores e visualização.',
@@ -81,11 +78,10 @@ final List<Oportunidade> oportunidadesMock = [
   Oportunidade(
     id: 'op-005',
     cursoId: 'curso-001',
-    instituicaoId: 'inst-001',
     titulo: 'Processo Seletivo - Mestrado em Computação',
     descricao:
         'Inscrições abertas para o processo seletivo do programa de Mestrado.',
-    tipo: TipoOportunidade.processoSeletivo,
+    tipo: TipoOportunidade.cursoGratuito,
     vagas: 10,
     dataInicioInscricao: DateTime(2026, 9, 1),
     dataFimInscricao: DateTime(2026, 10, 15),
@@ -95,5 +91,6 @@ final List<Oportunidade> oportunidadesMock = [
     imagemUrl: '4.jpeg',
     historicoEscolarObrigatorio: true,
     comprovanteRendaObrigatorio: false,
+    possuiProcessoSeletivo: true,
   ),
 ];

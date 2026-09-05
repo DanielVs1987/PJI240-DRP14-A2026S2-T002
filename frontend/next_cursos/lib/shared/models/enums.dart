@@ -8,7 +8,6 @@ enum TipoOportunidade {
   cursoGratuito,
   bolsaParcial,
   bolsaIntegral,
-  processoSeletivo,
 }
 
 enum StatusOportunidade {

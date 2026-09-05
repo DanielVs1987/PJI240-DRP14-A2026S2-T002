@@ -126,15 +126,67 @@ class _HomePageState extends State<HomePage> {
                   _quickFilter(
                     icon: Icons.school_outlined,
                     text: 'Cursos gratuitos',
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.oportunidadesLista,
+                        arguments: OportunidadesListArgs(
+                          titulo: 'Cursos Gratuitos',
+                          tipos: [TipoOportunidade.cursoGratuito],
+                          authUser: authUser,
+                        ),
+                      );
+                    },
                   ),
                   _quickFilter(
                     icon: Icons.workspace_premium_outlined,
                     text: 'Bolsas',
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.oportunidadesLista,
+                        arguments: OportunidadesListArgs(
+                          titulo: 'Bolsas de Estudo',
+                          tipos: [
+                            TipoOportunidade.bolsaParcial,
+                            TipoOportunidade.bolsaIntegral
+                          ],
+                          authUser: authUser,
+                        ),
+                      );
+                    },
                   ),
-                  _quickFilter(icon: Icons.laptop_outlined, text: 'Online'),
+                  _quickFilter(
+                    icon: Icons.laptop_outlined,
+                    text: 'Online',
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.oportunidadesLista,
+                        arguments: OportunidadesListArgs(
+                          titulo: 'Cursos Online',
+                          tipos: TipoOportunidade.values,
+                          modalidades: [ModalidadeCurso.online],
+                          authUser: authUser,
+                        ),
+                      );
+                    },
+                  ),
                   _quickFilter(
                     icon: Icons.location_on_outlined,
                     text: 'Presencial',
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.oportunidadesLista,
+                        arguments: OportunidadesListArgs(
+                          titulo: 'Cursos Presenciais',
+                          tipos: TipoOportunidade.values,
+                          modalidades: [ModalidadeCurso.presencial],
+                          authUser: authUser,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -194,9 +246,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _quickFilter({required IconData icon, required String text}) {
+  Widget _quickFilter({
+    required IconData icon,
+    required String text,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       borderRadius: BorderRadius.circular(30),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -377,7 +433,8 @@ class _HomePageState extends State<HomePage> {
                         arguments: OportunidadesListArgs(
                           authUser: authUser,
                           titulo: 'Processos Seletivos',
-                          tipos: [TipoOportunidade.processoSeletivo],
+                          tipos: TipoOportunidade.values, // Busca em todos os tipos
+                          filtrarPorProcessoSeletivo: true,
                         ),
                       );
                     },
@@ -620,15 +677,16 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    debugPrint('Buscar por: $termo');
-
-    // Posteriormente:
-    //
-    // Navigator.pushNamed(
-    //   context,
-    //   AppRoutes.oportunidades,
-    //   arguments: termo,
-    // );
+    Navigator.pushNamed(
+      context,
+      AppRoutes.oportunidadesLista,
+      arguments: OportunidadesListArgs(
+        titulo: 'Resultados da Busca',
+        tipos: TipoOportunidade.values,
+        termoBuscaInicial: termo,
+        authUser: authUser,
+      ),
+    );
   }
 }
 

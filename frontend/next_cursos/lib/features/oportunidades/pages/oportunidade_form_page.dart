@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:next_cursos/shared/widgets/divisor_barra.dart';
+import 'package:next_cursos/shared/widgets/build_footer.dart';
 import '../../../core/theme/theme.dart';
 import '../../../data/mock/cursos_mock.dart';
 import '../../../shared/models/enums.dart';
-import '../../../shared/widgets/build_footer.dart';
+import '../../../shared/widgets/divisor_barra.dart';
 import '../../../shared/widgets/nome_app.dart';
 import '../models/oportunidade.dart';
 
@@ -31,12 +31,12 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
 
   String? _cursoId;
   TipoOportunidade? _tipo;
-  StatusOportunidade _status = StatusOportunidade.rascunho;
   DateTime? _dataInicioInscricao;
   DateTime? _dataFimInscricao;
   DateTime? _dataInicioCurso;
   bool _destaque = false;
-  bool _historicoEscolarObrigatorio = false;
+  bool _possuiProcessoSeletivo = false;
+  bool _historicoEscolarObrigatorio = true;
   bool _comprovanteRendaObrigatorio = false;
 
   @override
@@ -57,13 +57,13 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
     if (op != null) {
       _cursoId = op.cursoId;
       _tipo = op.tipo;
-      _status = op.status;
       _dataInicioInscricao = op.dataInicioInscricao;
       _dataFimInscricao = op.dataFimInscricao;
       _dataInicioCurso = op.dataInicioCurso;
       _destaque = op.destaque;
-      _historicoEscolarObrigatorio = op.historicoEscolarObrigatorio!;
-      _comprovanteRendaObrigatorio = op.comprovanteRendaObrigatorio!;
+      _possuiProcessoSeletivo = op.possuiProcessoSeletivo;
+      _historicoEscolarObrigatorio = op.historicoEscolarObrigatorio;
+      _comprovanteRendaObrigatorio = op.comprovanteRendaObrigatorio;
     }
   }
 
@@ -97,6 +97,16 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
 
   void _salvar() {
     if (_formKey.currentState!.validate()) {
+      if (_dataInicioInscricao == null || _dataFimInscricao == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Selecione as datas de inscrição'),
+            backgroundColor: AppColors.colors.negativeHighlights,
+          ),
+        );
+        return;
+      }
+
       // Mock de salvamento
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -122,13 +132,20 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
           children: [
             nomeApp(context),
             divisorBarra(40),
-            Text(
-              widget.oportunidade == null
-                  ? 'Nova Oportunidade'
-                  : 'Editar Oportunidade',
-              ),
+            !isMobile
+                ? Text(
+                    widget.oportunidade == null
+                        ? 'Nova Oportunidade'
+                        : 'Editar Oportunidade',
+                  )
+                : Text(
+                    widget.oportunidade == null
+                        ? 'Nova'
+                        : 'Editar',
+                  ),
           ],
         ),
+
         elevation: 0,
       ),
       body: CustomScrollView(
@@ -137,17 +154,15 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
             padding: EdgeInsets.all(isMobile ? 16 : 32),
             sliver: SliverToBoxAdapter(
               child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 800),
-
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _boxSection([
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _containerSection(
+                          child: [
                             _sectionTitle('Informações Básicas'),
                             const SizedBox(height: 20),
                             TextFormField(
@@ -221,11 +236,13 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
                                 ),
                               ],
                             ),
-                          ]),
+                          ],
+                        ),
 
-                          const SizedBox(height: 16),
+                        const SizedBox(height: 32),
 
-                          _boxSection([
+                        _containerSection(
+                          child: [
                             _sectionTitle('Cronograma'),
                             const SizedBox(height: 20),
                             Row(
@@ -255,10 +272,14 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
                               date: _dataInicioCurso,
                               onTap: () => _selectDate(context, 'inicioCurso'),
                             ),
-                          ]),
-                          const SizedBox(height: 16),
-                          _boxSection([
-                            _sectionTitle('Detalhes e Requisitos'),
+                          ],
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        _containerSection(
+                          child: [
+                            _sectionTitle('Configurações e Requisitos'),
                             const SizedBox(height: 20),
                             TextFormField(
                               controller: _descricaoController,
@@ -290,66 +311,59 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            SwitchListTile(
+                            CheckboxListTile(
+                              title: const Text('Possui Processo Seletivo?'),
+                              value: _possuiProcessoSeletivo,
+                              onChanged: (v) => setState(
+                                () => _possuiProcessoSeletivo = v ?? false,
+                              ),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            CheckboxListTile(
                               title: const Text(
-                                'Exige histórico escolar para inscrição',
+                                'Histórico Escolar Obrigatório?',
                               ),
                               value: _historicoEscolarObrigatorio,
                               onChanged: (v) => setState(
-                                () => _historicoEscolarObrigatorio = v,
+                                () => _historicoEscolarObrigatorio = v ?? false,
+                              ),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            CheckboxListTile(
+                              title: const Text(
+                                'Comprovante de Renda Obrigatório?',
+                              ),
+                              value: _comprovanteRendaObrigatorio,
+                              onChanged: (v) => setState(
+                                () => _comprovanteRendaObrigatorio = v ?? false,
                               ),
                               contentPadding: EdgeInsets.zero,
                             ),
                             SwitchListTile(
                               title: const Text(
-                                'Exige comprovante de renda para inscrição',
-                              ),
-                              value: _comprovanteRendaObrigatorio,
-                              onChanged: (v) => setState(
-                                () => _comprovanteRendaObrigatorio = v,
-                              ),
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                            SwitchListTile(
-                              title: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Colocar em destaque na página inicial do site',
-                                  ),
-                                  Text(
-                                    '(Apenas 1 oportunidade pode estar em destaque por vez, ficando fixa por até 5 dias após a publicação.)',
-                                    style: Theme.of(context).textTheme.bodySmall
-                                        ?.copyWith(
-                                          color: AppColors.colors.textSecondary,
-                                        ),
-                                  ),
-                                ],
+                                'Colocar em destaque na página inicial',
                               ),
                               value: _destaque,
                               onChanged: (v) => setState(() => _destaque = v),
                               contentPadding: EdgeInsets.zero,
                             ),
-                          ]),
-
-                          SizedBox(height: 20),
-
-                          SizedBox(
-                            width: double.infinity,
-                            height: 55,
-                            child: ElevatedButton(
-                              onPressed: _salvar,
-                              child: Text(
-                                widget.oportunidade == null
-                                    ? 'CADASTRAR OPORTUNIDADE'
-                                    : 'SALVAR ALTERAÇÕES',
-                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 40),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: ElevatedButton(
+                            onPressed: _salvar,
+                            child: Text(
+                              widget.oportunidade == null
+                                  ? 'CADASTRAR OPORTUNIDADE'
+                                  : 'SALVAR ALTERAÇÕES',
                             ),
                           ),
-                          const SizedBox(height: 50),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 50),
+                      ],
                     ),
                   ),
                 ),
@@ -374,8 +388,7 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: AppColors.colors.textPrimary,
+          style: AppTextStyles.titleLarge().copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -408,21 +421,18 @@ class _OportunidadeFormPageState extends State<OportunidadeFormPage> {
   }
 }
 
-Widget _boxSection(List<Widget> child) {
+Widget _containerSection({required List<Widget> child}) {
   return Container(
     padding: const EdgeInsets.all(16),
-    margin: const EdgeInsets.symmetric(vertical: 8),
     decoration: BoxDecoration(
       color: AppColors.colors.surface,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.1),
-          blurRadius: 4,
-          offset: const Offset(0, 2),
-        ),
-      ],
+      border: Border.all(color: AppColors.colors.secondary),
+      borderRadius: BorderRadius.circular(16),
     ),
-    child: Column(children: child),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+
+      children: child,
+    ),
   );
 }

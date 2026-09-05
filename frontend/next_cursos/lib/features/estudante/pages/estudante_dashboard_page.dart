@@ -61,7 +61,7 @@ class _EstudanteDashboardPageState extends State<EstudanteDashboardPage> {
                     TipoOportunidade.cursoGratuito,
                     TipoOportunidade.bolsaIntegral,
                     TipoOportunidade.bolsaParcial,
-                    TipoOportunidade.processoSeletivo,
+                   // TipoOportunidade.processoSeletivo,
                   ],
                   authUser: authUser,
                 ),

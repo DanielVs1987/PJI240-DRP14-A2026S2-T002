@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../core/auth/auth_service.dart';
 import '../features/home/home_page.dart';
 import '../features/oportunidades/models/oportunidade.dart';
 import '../features/oportunidades/pages/oportunidade_detail_page.dart';
@@ -9,6 +8,8 @@ import '../features/oportunidades/pages/oportunidade_form_page.dart';
 import '../features/oportunidades/pages/oportunidades_list_page.dart';
 import '../features/oportunidades/pages/oportunidade_inscritos_page.dart';
 import '../features/inscricoes/pages/inscricao_form_page.dart';
+import '../features/cursos/pages/curso_form_page.dart';
+import '../features/cursos/models/curso.dart';
 
 class AppRoutes {
   static const String home = '/';
@@ -19,6 +20,7 @@ class AppRoutes {
   static const String oportunidadeFormulario = '/oportunidade-formulario';
   static const String oportunidadeInscritos = '/oportunidade-inscritos';
   static const String inscricaoFormulario = '/inscricao-formulario';
+  static const String cursoFormulario = '/curso-formulario';
 
   static Map<String, WidgetBuilder> routes() {
     return {
@@ -51,6 +53,11 @@ class AppRoutes {
         final oportunidade =
             ModalRoute.of(context)!.settings.arguments as Oportunidade;
         return InscricaoFormPage(oportunidade: oportunidade);
+      },
+
+      cursoFormulario: (context) {
+        final curso = ModalRoute.of(context)!.settings.arguments as Curso?;
+        return CursoFormPage(curso: curso);
       },
 
       estudanteDashboard: (context) => const EstudanteDashboardPage(),
