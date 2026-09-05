@@ -6,6 +6,8 @@ import '../../../data/mock/estudantes_mock.dart';
 import '../../../data/mock/inscricoes_mock.dart';
 import '../../../data/mock/resultados_mock.dart';
 import '../../../shared/models/enums.dart';
+import '../../../shared/widgets/divisor_barra.dart';
+import '../../../shared/widgets/nome_app.dart';
 import '../../inscricoes/models/inscricao.dart';
 import '../models/oportunidade.dart';
 
@@ -33,7 +35,16 @@ class _OportunidadeInscritosPageState extends State<OportunidadeInscritosPage> {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Gestão de Inscritos'), elevation: 0),
+      appBar: AppBar(
+        title: Row(
+          children: [
+            nomeApp(context),
+            divisorBarra(40),
+            const Text('Formulário de Inscrição'),
+          ],
+        ),
+        elevation: 0,
+      ),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(

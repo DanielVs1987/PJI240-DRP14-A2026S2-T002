@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:next_cursos/shared/widgets/build_app_bar.dart';
 import 'package:next_cursos/shared/widgets/build_footer.dart';
+import '../../../core/auth/auth_service.dart';
+import '../../../app/app_routes.dart';
+import '../../../shared/dialogs/login_estudante_dialog.dart';
 import '../../../core/theme/theme.dart';
 import '../models/oportunidade.dart';
 import 'package:intl/intl.dart';
 
 
+
 class OportunidadeDetailPage extends StatelessWidget {
   final Oportunidade oportunidade;
 
-  const OportunidadeDetailPage({super.key, required this.oportunidade});
+  const OportunidadeDetailPage({
+    super.key,
+    required this.oportunidade,
+  });
 
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy');
     final isMobile = MediaQuery.sizeOf(context).width < 700;
+
 
     return Scaffold(
       appBar: buildAppBar(context),
@@ -30,8 +38,7 @@ class OportunidadeDetailPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(
-                      'assets/carousel_images/${oportunidade.imagemUrl}',
-                    ),
+                        'assets/carousel_images/${oportunidade.imagemUrl}'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -96,32 +103,28 @@ class OportunidadeDetailPage extends StatelessWidget {
                         _buildInfoItem(
                           icon: Icons.calendar_today_outlined,
                           label: 'Inscrições até',
-                          value: dateFormat.format(
-                            oportunidade.dataFimInscricao,
-                          ),
-                          context: context,
+                          value: dateFormat.format(oportunidade.dataFimInscricao),
+                          context: context
                         ),
                         _buildInfoItem(
                           icon: Icons.people_outline,
                           label: 'Vagas disponíveis',
                           value: '${oportunidade.vagas} vagas',
-                          context: context,
+                          context: context
                         ),
                         if (oportunidade.percentualBolsa != null)
                           _buildInfoItem(
                             icon: Icons.confirmation_number_outlined,
                             label: 'Percentual da Bolsa',
                             value: '${oportunidade.percentualBolsa!.toInt()}%',
-                            context: context,
+                            context: context
                           ),
                         if (oportunidade.dataInicioCurso != null)
                           _buildInfoItem(
                             icon: Icons.play_circle_outline,
                             label: 'Início das aulas',
-                            value: dateFormat.format(
-                              oportunidade.dataInicioCurso!,
-                            ),
-                            context: context,
+                            value: dateFormat.format(oportunidade.dataInicioCurso!),
+                            context: context
                           ),
                       ],
                     ),
@@ -161,14 +164,30 @@ class OportunidadeDetailPage extends StatelessWidget {
                       width: isMobile ? double.infinity : 300,
                       child: ElevatedButton(
                         onPressed: () {
-                          // TODO: Implementar lógica de inscrição
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Funcionalidade de inscrição em breve!',
+                          final auth = AuthService();
+                          if (!auth.isAuthenticated) {
+                            showDialog(
+                              context: context,
+                              builder: (_) => const LoginEstudanteDialog(),
+                            );
+                            return;
+                          }
+
+                          if (auth.isEstudante) {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.inscricaoFormulario,
+                              arguments: oportunidade,
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Apenas estudantes podem se inscrever.',
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 22),

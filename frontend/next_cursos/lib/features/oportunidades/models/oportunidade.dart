@@ -18,6 +18,9 @@ class Oportunidade {
   final String? editalUrl;
   final String? observacoes;
   final String? imagemUrl;
+  final bool? historicoEscolarObrigatorio;
+  final bool? comprovanteRendaObrigatorio;
+
 
   const Oportunidade({
     required this.id,
@@ -36,7 +39,9 @@ class Oportunidade {
     this.requisitos,
     this.editalUrl,
     this.observacoes,
-    this.imagemUrl
+    this.imagemUrl,
+    this.historicoEscolarObrigatorio,
+    this.comprovanteRendaObrigatorio
   });
 
   Oportunidade copyWith({
@@ -56,7 +61,9 @@ class Oportunidade {
     String? requisitos,
     String? editalUrl,
     String? observacoes,
-    String? imagemUrl
+    String? imagemUrl,
+    bool? historicoEscolarObrigatorio,
+    bool? comprovanteRendaObrigatorio
   }) {
     return Oportunidade(
       id: id ?? this.id,
@@ -75,7 +82,9 @@ class Oportunidade {
       requisitos: requisitos ?? this.requisitos,
       editalUrl: editalUrl ?? this.editalUrl,
       observacoes: observacoes ?? this.observacoes,
-      imagemUrl:  imagemUrl ?? this.imagemUrl
+      imagemUrl:  imagemUrl ?? this.imagemUrl,
+      historicoEscolarObrigatorio: historicoEscolarObrigatorio ?? this.historicoEscolarObrigatorio,
+      comprovanteRendaObrigatorio: comprovanteRendaObrigatorio ?? this.comprovanteRendaObrigatorio
     );
   }
 
@@ -98,6 +107,8 @@ class Oportunidade {
       'editalUrl': editalUrl,
       'observacoes': observacoes,
       'imagemUrl': imagemUrl,
+      'historicoEscolarObrigatorio': historicoEscolarObrigatorio,
+      'comprovanteRendaObrigatorio': comprovanteRendaObrigatorio,
     };
   }
 
@@ -125,7 +136,9 @@ class Oportunidade {
       requisitos: map['requisitos'],
       editalUrl: map['editalUrl'],
       observacoes: map['observacoes'],
-        imagemUrl: map['imagemUrl'] ?? ''
+      imagemUrl: map['imagemUrl'] ?? '',
+      historicoEscolarObrigatorio: map['historicoEscolarObrigatorio'] ?? false,
+      comprovanteRendaObrigatorio: map['comprovanteRendaObrigatorio'] ?? false
     );
   }
 }

@@ -19,6 +19,8 @@ final List<Oportunidade> oportunidadesMock = [
     destaque: true,
     requisitos: 'Ensino médio completo.',
     imagemUrl: '4.jpeg',
+    historicoEscolarObrigatorio: true,
+    comprovanteRendaObrigatorio: true,
   ),
   Oportunidade(
     id: 'op-002',
@@ -36,6 +38,8 @@ final List<Oportunidade> oportunidadesMock = [
     destaque: true,
     requisitos: 'Conhecimentos básicos de informática.',
     imagemUrl: '1.jpeg',
+    historicoEscolarObrigatorio: true,
+    comprovanteRendaObrigatorio: true,
   ),
   Oportunidade(
     id: 'op-003',
@@ -53,6 +57,8 @@ final List<Oportunidade> oportunidadesMock = [
     status: StatusOportunidade.inscricoesAbertas,
     destaque: true,
     imagemUrl: '2.jpeg',
+    historicoEscolarObrigatorio: true,
+    comprovanteRendaObrigatorio: false,
   ),
   Oportunidade(
     id: 'op-004',
@@ -69,6 +75,8 @@ final List<Oportunidade> oportunidadesMock = [
     status: StatusOportunidade.inscricoesAbertas,
     destaque: true,
     imagemUrl: '3.jpeg',
+    historicoEscolarObrigatorio: true,
+    comprovanteRendaObrigatorio: false,
   ),
   Oportunidade(
     id: 'op-005',
@@ -85,5 +93,7 @@ final List<Oportunidade> oportunidadesMock = [
     status: StatusOportunidade.inscricoesAbertas,
     destaque: false,
     imagemUrl: '4.jpeg',
+    historicoEscolarObrigatorio: true,
+    comprovanteRendaObrigatorio: false,
   ),
 ];

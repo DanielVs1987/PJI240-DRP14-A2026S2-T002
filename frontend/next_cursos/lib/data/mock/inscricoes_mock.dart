@@ -25,4 +25,12 @@ final List<Inscricao> inscricoesMock = [
     dataInscricao: DateTime(2026, 8, 25),
     status: StatusInscricao.pendente,
   ),
+  Inscricao(
+    id: 'ins-004',
+    estudanteId: 'est-002',
+    oportunidadeId: 'op-001',
+    dataInscricao: DateTime(2026, 8, 25),
+    status: StatusInscricao.aprovado,
+  ),
+
 ];
